@@ -1,0 +1,58 @@
+#!/bin/bash
+
+# Stop script on any error
+set -e
+
+# Add the GitHub CLI GPG key and repository
+sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-key C99B11DEB97541F0
+sudo apt-add-repository https://cli.github.com/packages
+
+# Update and upgrade packages
+sudo apt-get update && sudo apt-get upgrade -y
+
+# Install GitHub CLI, Git, and build-essential
+sudo apt-get install -y gh git build-essential
+
+# Install Node Version Manager (NVM)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+
+# Load NVM into current session
+export NVM_DIR="$([ -z "${XDG_CONFIG_HOME-}" ] && printf %s "${HOME}/.nvm" || printf %s "${XDG_CONFIG_HOME}/nvm")"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+
+# Install the latest LTS version of Node.js
+nvm install --lts
+nvm use --lts
+
+# Install bun
+npm install -g bun
+
+# Clone your GitHub project
+PROJECT_DIR="$HOME/sisyphus-monkey"
+if [ ! -d "$PROJECT_DIR" ]; then
+    git clone git@github.com:joeczar/sisyphus-monkey.git "$PROJECT_DIR"
+    echo "Project cloned successfully."
+else
+    echo "Project directory already exists."
+fi
+
+# Install project dependencies
+cd "$PROJECT_DIR"
+npm install
+
+# Append Git aliases to .bashrc
+echo "# Git aliases" >> ~/.bashrc
+echo "alias g=\"git\"" >> ~/.bashrc
+echo "alias gs=\"git status\"" >> ~/.bashrc
+echo "alias ga=\"git add\"" >> ~/.bashrc
+echo "alias gaa=\"git add --all\"" >> ~/.bashrc
+echo "alias gc=\"git commit\"" >> ~/.bashrc
+echo "alias gcm=\"git commit -m\"" >> ~/.bashrc
+echo "alias gca=\"git commit --amend\"" >> ~/.bashrc
+echo "alias gcam=\"git commit --amend -m\"" >> ~/.bashrc
+echo "alias gp=\"git push\"" >> ~/.bashrc
+echo "alias gpl=\"git pull\"" >> ~/.bashrc
+echo "alias gplm=\"git pull origin main\"" >> ~/.bashrc
+echo "alias gmom=\"git merge origin/main\"" >> ~/.bashrc
+
+echo "Setup complete! Don't forget to source your .bashrc or restart your terminal."
